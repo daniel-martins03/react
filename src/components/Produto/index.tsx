@@ -1,50 +1,38 @@
-import { useDispatch } from 'react-redux'
-import { Produto as ProdutoType } from '../../App'
+import { useSelector } from 'react-redux'
+import { Produto as ProdutoType } from '../App'
+
 import * as S from './styles'
+import { useGetProdutosQuery } from '../services/api'
 
-import { adicionaCarrinho } from '../../store/reducers/cart'
-import { adicionaFavorito } from '../../store/reducers/favorite'
+import { RootReducer } from '../store'
+import Produto from '../components/Produto'
 
-export type PropsFav = {
-  produto: ProdutoType
-  estaNosFavoritos: boolean
-}
+const ProdutosComponent = () => {
+  const { data: produtos, isLoading } = useGetProdutosQuery()
+  const favoritos = useSelector((state: RootReducer) => state.favorito.itens)
 
-export const paraReal = (valor: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-    valor
-  )
+  if (isLoading) return <h2>Carregando..</h2>
 
-const ProdutoComponent = ({ produto, estaNosFavoritos }: PropsFav) => {
-  const dispatch = useDispatch()
+  const produtoEstaNosFavoritos = (produto: ProdutoType) => {
+    const produtoId = produto.id
+    const IdDosFavoritos = favoritos.map((f) => f.id)
+
+    return IdDosFavoritos.includes(produtoId)
+  }
 
   return (
-    <S.Produto>
-      <S.Capa>
-        <img src={produto.imagem} alt={produto.nome} />
-      </S.Capa>
-      <S.Titulo>{produto.nome}</S.Titulo>
-      <S.Prices>
-        <strong>{paraReal(produto.preco)}</strong>
-      </S.Prices>
-      <S.BtnComprar
-        onClick={() => {
-          dispatch(adicionaFavorito(produto))
-        }}
-        type="button"
-      >
-        {estaNosFavoritos
-          ? '- Remover dos favoritos'
-          : '+ Adicionar aos favoritos'}
-      </S.BtnComprar>
-      <S.BtnComprar
-        onClick={() => dispatch(adicionaCarrinho(produto))}
-        type="button"
-      >
-        Adicionar ao carrinho
-      </S.BtnComprar>
-    </S.Produto>
+    <>
+      <S.Produtos>
+        {produtos?.map((produto) => (
+          <Produto
+            estaNosFavoritos={produtoEstaNosFavoritos(produto)}
+            key={produto.id}
+            produto={produto}
+          />
+        ))}
+      </S.Produtos>
+    </>
   )
 }
 
-export default ProdutoComponent
+export default ProdutosComponent
