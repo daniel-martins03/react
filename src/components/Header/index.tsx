@@ -28,13 +28,3 @@ const Header = () => {
 }
 
 export default Header
-        <img src={cesta} />
-        <span>
-          {itensNoCarrinho.length} itens, valor total: {paraReal(valorTotal)}
-        </span>
-      </div>
-    </S.Header>
-  )
-}
-
-export default Header
